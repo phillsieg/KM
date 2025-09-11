@@ -1,0 +1,360 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String?
+  image           String?
+  role            UserRole @default(VISITOR)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  accounts        Account[]
+  sessions        Session[]
+  ownedContent    Content[] @relation("ContentOwner")
+  authoredContent Content[] @relation("ContentAuthor")
+  reviewTasks     ReviewTask[]
+  comments        Comment[]
+  savedSearches   SavedSearch[]
+  subscriptions   Subscription[]
+  
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model Domain {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  color       String?
+  icon        String?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  content     Content[]
+  
+  @@map("domains")
+}
+
+model Content {
+  id              String          @id @default(cuid())
+  title           String
+  summary         String
+  body            String          @db.Text
+  slug            String          @unique
+  contentType     ContentType
+  lifecycleState  LifecycleState  @default(DRAFT)
+  effectiveDate   DateTime?
+  reviewCycle     Int             @default(12)
+  sensitivity     Sensitivity     @default(INTERNAL)
+  
+  domainId        String
+  ownerId         String
+  authorId        String
+  
+  domain          Domain          @relation(fields: [domainId], references: [id])
+  owner           User            @relation("ContentOwner", fields: [ownerId], references: [id])
+  author          User            @relation("ContentAuthor", fields: [authorId], references: [id])
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  publishedAt     DateTime?
+  lastReviewedAt  DateTime?
+  nextReviewDate  DateTime?
+  deprecatedAt    DateTime?
+  
+  versions        ContentVersion[]
+  tags            ContentTag[]
+  relatedContent  ContentRelation[] @relation("FromContent")
+  referencedBy    ContentRelation[] @relation("ToContent")
+  reviewTasks     ReviewTask[]
+  comments        Comment[]
+  attachments     Attachment[]
+  analytics       ContentAnalytics[]
+  subscriptions   Subscription[]
+  
+  @@map("content")
+}
+
+model ContentVersion {
+  id          String   @id @default(cuid())
+  version     String
+  changelog   String?
+  body        String   @db.Text
+  contentId   String
+  authorId    String
+  createdAt   DateTime @default(now())
+  
+  content     Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  @@map("content_versions")
+}
+
+model Tag {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  slug        String       @unique
+  category    TagCategory?
+  description String?
+  color       String?
+  createdAt   DateTime     @default(now())
+  
+  content     ContentTag[]
+  
+  @@map("tags")
+}
+
+model ContentTag {
+  id        String  @id @default(cuid())
+  contentId String
+  tagId     String
+  
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@unique([contentId, tagId])
+  @@map("content_tags")
+}
+
+model ContentRelation {
+  id            String      @id @default(cuid())
+  fromContentId String
+  toContentId   String
+  relationType  RelationType
+  
+  fromContent   Content     @relation("FromContent", fields: [fromContentId], references: [id], onDelete: Cascade)
+  toContent     Content     @relation("ToContent", fields: [toContentId], references: [id], onDelete: Cascade)
+  
+  @@unique([fromContentId, toContentId, relationType])
+  @@map("content_relations")
+}
+
+model ReviewTask {
+  id          String           @id @default(cuid())
+  contentId   String
+  reviewerId  String
+  status      ReviewStatus     @default(PENDING)
+  dueDate     DateTime
+  completedAt DateTime?
+  feedback    String?
+  approved    Boolean?
+  
+  content     Content          @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  reviewer    User             @relation(fields: [reviewerId], references: [id])
+  
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@map("review_tasks")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  contentId String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id])
+  
+  @@map("comments")
+}
+
+model Attachment {
+  id          String   @id @default(cuid())
+  contentId   String
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  url         String
+  createdAt   DateTime @default(now())
+  
+  content     Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  @@map("attachments")
+}
+
+model SavedSearch {
+  id          String   @id @default(cuid())
+  userId      String
+  title       String
+  query       String   @db.Text
+  filters     Json
+  isPinned    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("saved_searches")
+}
+
+model Subscription {
+  id          String           @id @default(cuid())
+  userId      String
+  contentId   String?
+  domainId    String?
+  type        SubscriptionType
+  frequency   NotificationFrequency @default(IMMEDIATE)
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content     Content?         @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
+}
+
+model ContentAnalytics {
+  id          String   @id @default(cuid())
+  contentId   String
+  userId      String?
+  event       AnalyticsEvent
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  
+  content     Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  
+  @@map("content_analytics")
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  resource    String
+  resourceId  String
+  oldValues   Json?
+  newValues   Json?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  
+  @@map("audit_logs")
+}
+
+enum UserRole {
+  VISITOR
+  CONTRIBUTOR
+  STEWARD
+  OWNER
+  ADMIN
+}
+
+enum ContentType {
+  SOP
+  POLICY
+  STANDARD
+  WORK_INSTRUCTION
+  JOB_AID
+  FORM_TEMPLATE
+  FAQ
+  TECH_NOTE
+  RELEASE_NOTES
+  DECISION_LOG
+  DASHBOARD
+}
+
+enum LifecycleState {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  DEPRECATED
+}
+
+enum Sensitivity {
+  PUBLIC
+  INTERNAL
+  RESTRICTED
+}
+
+enum TagCategory {
+  DOMAIN
+  AUDIENCE
+  SYSTEM
+  REGION
+  KEYWORD
+}
+
+enum RelationType {
+  REFERENCES
+  SUPERSEDES
+  RELATED_TO
+  PART_OF
+}
+
+enum ReviewStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum SubscriptionType {
+  CONTENT_UPDATES
+  DOMAIN_DIGEST
+  REVIEW_REMINDERS
+}
+
+enum NotificationFrequency {
+  IMMEDIATE
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum AnalyticsEvent {
+  VIEW
+  DOWNLOAD
+  SEARCH
+  BOOKMARK
+  SHARE
+}
