@@ -8,7 +8,8 @@ import {
   BellIcon, 
   ChevronDownIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  PlusIcon
 } from '@heroicons/react/24/outline'
 import { Menu, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
@@ -57,6 +58,15 @@ export function Header() {
             >
               <MagnifyingGlassIcon className="h-5 w-5" />
             </button>
+
+            {/* Create Document Button */}
+            <Link
+              href="/create"
+              className="inline-flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              <PlusIcon className="h-4 w-4" />
+              <span className="hidden sm:inline">Create</span>
+            </Link>
 
             {/* Notifications */}
             <button
