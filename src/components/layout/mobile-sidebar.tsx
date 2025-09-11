@@ -3,20 +3,14 @@
 import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline'
-import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   HomeIcon,
-  DocumentTextIcon,
   FolderIcon,
-  ChartBarIcon,
-  UserGroupIcon,
-  CogIcon,
   MagnifyingGlassIcon,
   BookmarkIcon,
   ClockIcon,
-  BellIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
 

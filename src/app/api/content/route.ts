@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { ContentType, LifecycleState, Sensitivity } from '@prisma/client'
+import { ContentType, Sensitivity } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
     const contentType = searchParams.get('type')
     const status = searchParams.get('status')
 
-    const where: any = {}
+    const where: Record<string, string> = {}
     if (domainId) where.domainId = domainId
     if (contentType) where.contentType = contentType.toUpperCase()
     if (status) where.lifecycleState = status.toUpperCase()
