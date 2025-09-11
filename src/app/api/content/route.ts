@@ -9,15 +9,24 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ error: 'Unauthorized - Please log in first' }, { status: 401 })
     }
 
-    const user = await prisma.user.findUnique({
+    // Try to find user, create if doesn't exist
+    let user = await prisma.user.findUnique({
       where: { email: session.user.email }
     })
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+      console.log('User not found, creating new user:', session.user.email)
+      user = await prisma.user.create({
+        data: {
+          email: session.user.email,
+          name: session.user.name || null,
+          image: session.user.image || null,
+          role: 'CONTRIBUTOR'
+        }
+      })
     }
 
     const body = await request.json()
@@ -64,7 +73,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(newContent, { status: 201 })
   } catch (error) {
     console.error('Error creating content:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    
+    if (error instanceof Error) {
+      if (error.message.includes('relation') || error.message.includes('table')) {
+        return NextResponse.json({ 
+          error: 'Database not properly initialized. Please contact administrator to set up the database tables.' 
+        }, { status: 500 })
+      }
+    }
+    
+    return NextResponse.json({ 
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
