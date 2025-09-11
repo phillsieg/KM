@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
@@ -14,17 +14,17 @@ const domains = [
       {
         name: 'Documentation',
         items: [
-          { name: 'SOPs', href: '/domains/engineering/sops' },
-          { name: 'Policies', href: '/domains/engineering/policies' },
-          { name: 'Standards', href: '/domains/engineering/standards' },
+          { name: 'SOPs', href: '/search?domain=engineering&type=sop' },
+          { name: 'Policies', href: '/search?domain=engineering&type=policy' },
+          { name: 'Standards', href: '/search?domain=engineering&type=standard' },
         ]
       },
       {
         name: 'Resources',
         items: [
-          { name: 'Job Aids', href: '/domains/engineering/job-aids' },
-          { name: 'Templates', href: '/domains/engineering/templates' },
-          { name: 'FAQs', href: '/domains/engineering/faqs' },
+          { name: 'Job Aids', href: '/search?domain=engineering&type=job-aid' },
+          { name: 'Templates', href: '/search?domain=engineering&type=template' },
+          { name: 'FAQs', href: '/search?domain=engineering&type=faq' },
         ]
       }
     ]
@@ -37,17 +37,17 @@ const domains = [
       {
         name: 'Procedures',
         items: [
-          { name: 'SOPs', href: '/domains/operations/sops' },
-          { name: 'Work Instructions', href: '/domains/operations/work-instructions' },
-          { name: 'Checklists', href: '/domains/operations/checklists' },
+          { name: 'SOPs', href: '/search?domain=operations&type=sop' },
+          { name: 'Work Instructions', href: '/search?domain=operations&type=instruction' },
+          { name: 'Checklists', href: '/search?domain=operations&type=checklist' },
         ]
       },
       {
         name: 'Support',
         items: [
-          { name: 'Training Materials', href: '/domains/operations/training' },
-          { name: 'FAQs', href: '/domains/operations/faqs' },
-          { name: 'Troubleshooting', href: '/domains/operations/troubleshooting' },
+          { name: 'Training Materials', href: '/search?domain=operations&type=training' },
+          { name: 'FAQs', href: '/search?domain=operations&type=faq' },
+          { name: 'Troubleshooting', href: '/search?domain=operations&type=troubleshooting' },
         ]
       }
     ]
@@ -60,17 +60,17 @@ const domains = [
       {
         name: 'Documentation',
         items: [
-          { name: 'Policies', href: '/domains/compliance/policies' },
-          { name: 'Procedures', href: '/domains/compliance/procedures' },
-          { name: 'Guidelines', href: '/domains/compliance/guidelines' },
+          { name: 'Policies', href: '/search?domain=compliance&type=policy' },
+          { name: 'Procedures', href: '/search?domain=compliance&type=procedure' },
+          { name: 'Guidelines', href: '/search?domain=compliance&type=guideline' },
         ]
       },
       {
         name: 'Resources',
         items: [
-          { name: 'Audit Reports', href: '/domains/compliance/audits' },
-          { name: 'Training', href: '/domains/compliance/training' },
-          { name: 'Updates', href: '/domains/compliance/updates' },
+          { name: 'Audit Reports', href: '/search?domain=compliance&type=audit' },
+          { name: 'Training', href: '/search?domain=compliance&type=training' },
+          { name: 'Updates', href: '/search?domain=compliance&type=update' },
         ]
       }
     ]
@@ -79,6 +79,29 @@ const domains = [
 
 export function MegaMenu() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  const handleMouseEnter = (domainName: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+      timeoutRef.current = null
+    }
+    setActiveMenu(domainName)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setActiveMenu(null)
+    }, 1000) // 1 second delay before closing
+  }
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <div className="flex space-x-8">
@@ -86,8 +109,8 @@ export function MegaMenu() {
         <div
           key={domain.name}
           className="relative"
-          onMouseEnter={() => setActiveMenu(domain.name)}
-          onMouseLeave={() => setActiveMenu(null)}
+          onMouseEnter={() => handleMouseEnter(domain.name)}
+          onMouseLeave={handleMouseLeave}
         >
           <button
             className={cn(
@@ -100,7 +123,13 @@ export function MegaMenu() {
           </button>
 
           {activeMenu === domain.name && (
-            <div className="absolute left-0 z-10 mt-2 w-screen max-w-md transform px-2 sm:px-0">
+            <div 
+              className="absolute left-0 z-10 -mt-2 w-screen max-w-md transform px-2 sm:px-0"
+              onMouseEnter={() => handleMouseEnter(domain.name)}
+              onMouseLeave={handleMouseLeave}
+            >
+              {/* Invisible bridge area */}
+              <div className="h-4 w-full" />
               <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
                 <div className="relative grid gap-6 bg-white px-5 py-6 sm:gap-8 sm:p-8">
                   <Link
