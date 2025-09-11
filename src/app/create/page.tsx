@@ -195,7 +195,7 @@ export default function CreateDocumentPage() {
               </select>
               {domains.length === 0 && (
                 <p className="mt-1 text-sm text-red-600">
-                  If domains don't load, please refresh the page or check console for errors.
+                  If domains don&apos;t load, please refresh the page or check console for errors.
                 </p>
               )}
             </div>
