@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 export default function SetupPage() {
   const [status, setStatus] = useState<string>('ready')
@@ -140,12 +141,12 @@ export default function SetupPage() {
                 <p className="text-sm text-green-700 mb-3">
                   Your knowledge management system is ready to use.
                 </p>
-                <a
+                <Link
                   href="/"
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                 >
                   Go to Dashboard →
-                </a>
+                </Link>
               </div>
             )}
           </div>
