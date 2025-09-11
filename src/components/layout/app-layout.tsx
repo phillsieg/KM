@@ -22,10 +22,10 @@ export function AppLayout({
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      <div className={cn('flex', sidebar && 'lg:pl-64')}>
+      <div className="flex">
         {sidebar && <Sidebar />}
         
-        <main className="flex-1">
+        <main className={cn('flex-1', sidebar && 'lg:ml-64')}>
           {breadcrumbs && (
             <div className="border-b border-gray-200 bg-white px-4 py-4 sm:px-6 lg:px-8">
               <Breadcrumbs items={breadcrumbs} />

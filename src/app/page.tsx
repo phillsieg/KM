@@ -7,7 +7,7 @@ import { RoleBasedTiles } from '@/components/dashboard/role-based-tiles'
 
 export default function Home() {
   return (
-    <AppLayout sidebar={true}>
+    <AppLayout sidebar={false}>
       <div className="space-y-8">
         {/* Header */}
         <div>

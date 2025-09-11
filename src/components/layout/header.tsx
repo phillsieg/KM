@@ -15,6 +15,7 @@ import { Fragment } from 'react'
 import { cn, getInitials } from '@/lib/utils'
 import { SearchBar } from '../search/search-bar'
 import { MegaMenu } from './mega-menu'
+import { MobileSidebar } from './mobile-sidebar'
 
 export function Header() {
   const { data: session } = useSession()
@@ -25,7 +26,8 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Brand */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            <MobileSidebar />
             <Link href="/" className="flex items-center space-x-2">
               <div className="h-8 w-8 bg-blue-600 rounded flex items-center justify-center">
                 <span className="text-white font-bold text-sm">KM</span>
