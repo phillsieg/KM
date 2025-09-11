@@ -52,16 +52,25 @@ export default function CreateDocumentPage() {
 
   const fetchDomains = async () => {
     try {
+      console.log('Fetching domains from /api/domains...')
       const response = await fetch('/api/domains')
+      console.log('Response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('Domains received:', data)
         setDomains(data)
         if (data.length > 0) {
           setFormData(prev => ({ ...prev, domainId: data[0].id }))
         }
+      } else {
+        const errorData = await response.json()
+        console.error('Failed to fetch domains:', errorData)
+        alert('Failed to load domains. Please try refreshing the page.')
       }
     } catch (error) {
       console.error('Error fetching domains:', error)
+      alert('Error loading domains. Please check your connection and try again.')
     }
   }
 
@@ -164,7 +173,7 @@ export default function CreateDocumentPage() {
 
             <div>
               <label htmlFor="domainId" className="block text-sm font-medium text-gray-700 mb-1">
-                Domain *
+                Domain * {domains.length === 0 && <span className="text-red-500">(Loading...)</span>}
               </label>
               <select
                 id="domainId"
@@ -173,14 +182,22 @@ export default function CreateDocumentPage() {
                 value={formData.domainId}
                 onChange={handleInputChange}
                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                disabled={domains.length === 0}
               >
-                <option value="">Select a domain</option>
+                <option value="">
+                  {domains.length === 0 ? 'Loading domains...' : 'Select a domain'}
+                </option>
                 {domains.map(domain => (
                   <option key={domain.id} value={domain.id}>
                     {domain.name}
                   </option>
                 ))}
               </select>
+              {domains.length === 0 && (
+                <p className="mt-1 text-sm text-red-600">
+                  If domains don't load, please refresh the page or check console for errors.
+                </p>
+              )}
             </div>
           </div>
 
