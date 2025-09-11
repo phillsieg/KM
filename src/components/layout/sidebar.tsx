@@ -16,7 +16,7 @@ import {
   BellIcon,
 } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
-import { hasPermission } from '@/lib/rbac'
+// import { hasPermission } from '@/lib/rbac'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon, roles: ['VISITOR', 'CONTRIBUTOR', 'STEWARD', 'OWNER', 'ADMIN'] },

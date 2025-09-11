@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { 
   MagnifyingGlassIcon, 
   BellIcon, 
-  UserCircleIcon,
   ChevronDownIcon,
   Bars3Icon,
   XMarkIcon
@@ -71,6 +70,7 @@ export function Header() {
               <Menu as="div" className="relative">
                 <Menu.Button className="flex items-center space-x-2 text-sm rounded-full p-1 hover:bg-gray-50">
                   {session.user.image ? (
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       className="h-8 w-8 rounded-full"
                       src={session.user.image}

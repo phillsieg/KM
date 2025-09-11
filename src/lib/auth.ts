@@ -12,7 +12,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    session: async ({ session, token, user }) => {
+    session: async ({ session, user }) => {
       if (session?.user && user) {
         session.user.id = user.id
         const dbUser = await prisma.user.findUnique({

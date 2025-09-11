@@ -8,7 +8,7 @@ import {
   DocumentDuplicateIcon,
   ClipboardDocumentListIcon 
 } from '@heroicons/react/24/outline'
-import { hasPermission } from '@/lib/rbac'
+import { hasPermission, permissions } from '@/lib/rbac'
 
 export function QuickActions() {
   const { data: session } = useSession()
@@ -50,7 +50,7 @@ export function QuickActions() {
   ]
 
   const availableActions = actions.filter(action => 
-    hasPermission(userRole, action.permission as any)
+    hasPermission(userRole, action.permission as keyof typeof permissions)
   )
 
   return (

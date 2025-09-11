@@ -147,6 +147,7 @@ export function RecentActivity() {
                       <div className="flex items-center space-x-2">
                         <div className="flex items-center space-x-1">
                           {activity.user.avatar ? (
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               className="h-6 w-6 rounded-full"
                               src={activity.user.avatar}

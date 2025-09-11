@@ -170,13 +170,13 @@ export function SearchBar({ className }: { className?: string }) {
                   }}
                   className="text-sm text-blue-600 hover:text-blue-800"
                 >
-                  View all results for "{query}"
+                  View all results for &ldquo;{query}&rdquo;
                 </button>
               </div>
             </>
           ) : query ? (
             <div className="px-4 py-2 text-sm text-gray-500">
-              No results found for "{query}"
+              No results found for &ldquo;{query}&rdquo;
             </div>
           ) : null}
         </div>
