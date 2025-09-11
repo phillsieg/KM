@@ -56,9 +56,9 @@ export function Sidebar() {
   )
 
   return (
-    <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col">
-      <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-4 pb-4 shadow-sm border-r border-gray-200">
-        <nav className="flex flex-1 flex-col pt-8">
+    <div className="sidebar-hidden-mobile lg:fixed lg:inset-y-0 sidebar-layer lg:flex lg:w-64 lg:flex-col">
+      <div className="flex h-full flex-col gap-y-5 overflow-y-auto bg-white px-4 pb-4 shadow-sm border-r border-gray-200">
+        <nav className="flex flex-1 flex-col pt-20">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
             {/* Main Navigation */}
             <li>
