@@ -116,8 +116,8 @@ export async function POST() {
     console.log('Core tables created successfully!')
 
     // Add sample domains
-    const existingDomains = await prisma.$queryRaw`SELECT COUNT(*) as count FROM domains`
-    const domainCount = Number((existingDomains as any)[0].count)
+    const existingDomains = await prisma.$queryRaw<{count: bigint}[]>`SELECT COUNT(*) as count FROM domains`
+    const domainCount = Number(existingDomains[0].count)
 
     if (domainCount === 0) {
       console.log('Adding sample domains...')
