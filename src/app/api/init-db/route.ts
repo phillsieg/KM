@@ -1,72 +1,82 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
 
-export async function POST() {
+export async function GET() {
   try {
-    // Test database connection
-    await prisma.$connect()
+    // Import prisma dynamically to avoid module loading issues
+    const { PrismaClient } = await import('@prisma/client')
+    const prisma = new PrismaClient()
     
-    // Push schema to database (equivalent to prisma db push)
-    console.log('Initializing database schema...')
+    console.log('Testing database connection...')
     
-    // Create some sample domains if they don't exist
-    const existingDomains = await prisma.domain.count()
+    // Test basic connection
+    await prisma.$executeRaw`SELECT 1`
+    console.log('Database connection successful!')
     
-    if (existingDomains === 0) {
-      await prisma.domain.createMany({
-        data: [
-          {
-            name: 'Engineering',
-            slug: 'engineering',
-            description: 'Technical documentation, SOPs, and standards',
-            color: '#3B82F6',
-            icon: 'code',
-          },
-          {
-            name: 'Operations',
-            slug: 'operations', 
-            description: 'Operational procedures and guidelines',
-            color: '#10B981',
-            icon: 'cog',
-          },
-          {
-            name: 'Compliance',
-            slug: 'compliance',
-            description: 'Regulatory and compliance documentation',
-            color: '#EF4444',
-            icon: 'shield',
-          },
-          {
-            name: 'Sales',
-            slug: 'sales',
-            description: 'Sales processes and customer resources',
-            color: '#8B5CF6',
-            icon: 'chart',
-          },
-          {
-            name: 'Marketing',
-            slug: 'marketing',
-            description: 'Marketing materials and brand guidelines',
-            color: '#F59E0B',
-            icon: 'megaphone',
-          },
-        ],
+    // Check if domains table exists and has data
+    try {
+      const existingDomains = await prisma.domain.count()
+      console.log(`Found ${existingDomains} existing domains`)
+      
+      if (existingDomains === 0) {
+        console.log('Creating sample domains...')
+        await prisma.domain.createMany({
+          data: [
+            {
+              name: 'Engineering',
+              slug: 'engineering',
+              description: 'Technical documentation, SOPs, and standards',
+              color: '#3B82F6',
+              icon: 'code',
+            },
+            {
+              name: 'Operations',
+              slug: 'operations', 
+              description: 'Operational procedures and guidelines',
+              color: '#10B981',
+              icon: 'cog',
+            },
+            {
+              name: 'Compliance',
+              slug: 'compliance',
+              description: 'Regulatory and compliance documentation',
+              color: '#EF4444',
+              icon: 'shield',
+            },
+          ],
+        })
+        console.log('Sample domains created successfully')
+      }
+      
+      const finalDomainCount = await prisma.domain.count()
+      await prisma.$disconnect()
+      
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Database initialized successfully',
+        domains: finalDomainCount,
+        status: existingDomains === 0 ? 'created_sample_data' : 'already_initialized'
       })
       
-      console.log('Sample domains created successfully')
+    } catch (tableError) {
+      console.log('Tables may not exist yet, this is normal on first run')
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Database connected but schema not yet created. Run `npx prisma db push` to create tables.',
+        error: tableError instanceof Error ? tableError.message : 'Schema setup needed'
+      })
     }
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Database initialized successfully',
-      domains: await prisma.domain.count()
-    })
     
   } catch (error) {
     console.error('Database initialization error:', error)
     return NextResponse.json({ 
       success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+      error: error instanceof Error ? error.message : 'Unknown database error',
+      tip: 'Make sure DATABASE_URL is set correctly and database is accessible'
     }, { status: 500 })
   }
+}
+
+// Also support POST for manual triggering
+export async function POST() {
+  return GET()
 }
