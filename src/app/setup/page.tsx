@@ -11,21 +11,18 @@ export default function SetupPage() {
   const runMigration = async () => {
     setLoading(true)
     setStatus('running')
-    setMessage('Creating database schema...')
+    setMessage('Creating database schema with raw SQL...')
     
     try {
-      const response = await fetch('/api/migrate', { method: 'POST' })
+      const response = await fetch('/api/db-push', { method: 'POST' })
       const data = await response.json()
       
       if (data.success) {
-        setStatus('success')
-        setMessage('Database schema created successfully! Now initializing sample data...')
-        
-        // Auto-run initialization after migration
-        setTimeout(() => initializeData(), 2000)
+        setStatus('complete')
+        setMessage(`✅ Setup complete! Database ready with ${data.domains} domains. Your KM system is ready to use!`)
       } else {
         setStatus('error')
-        setMessage(`Migration failed: ${data.error}`)
+        setMessage(`Database setup failed: ${data.error}`)
       }
     } catch (error) {
       setStatus('error')
