@@ -108,36 +108,79 @@ export function NovicePortal() {
         </div>
       </div>
 
-      {/* Quick Start Checklist */}
-      <div className="bg-white p-6 rounded-lg border border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-          <CheckCircleIcon className="h-5 w-5 text-green-500 mr-2" />
-          Quick Start Checklist
-        </h3>
+      {/* Quick Start Checklist - Enhanced */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 shadow-lg">
+        <div className="text-center mb-6">
+          <h3 className="text-2xl font-bold text-blue-900 mb-2">🚀 Your 4-Step Journey Starts Here!</h3>
+          <p className="text-blue-700">Complete these essential steps to unlock the full power of our knowledge system</p>
+        </div>
         
-        <div className="space-y-3">
-          {quickStartData.welcomeSteps.map((step) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {quickStartData.welcomeSteps.map((step, index) => (
             <Link
               key={step.id}
               href={step.href}
-              className="flex items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="group relative bg-white p-6 rounded-xl border-2 border-blue-100 hover:border-blue-300 hover:shadow-md transition-all duration-200 transform hover:scale-105"
             >
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 ${
-                step.completed ? 'bg-green-500' : 'bg-gray-200'
-              }`}>
+              {/* Step Number Badge */}
+              <div className="absolute -top-3 -left-3 w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                 {step.completed ? (
-                  <CheckCircleIcon className="h-4 w-4 text-white" />
+                  <CheckCircleIcon className="h-5 w-5 text-white" />
                 ) : (
-                  <span className="text-xs text-gray-500">{step.id}</span>
+                  <span className="text-sm font-bold text-white">{step.id}</span>
                 )}
               </div>
-              <span className={`text-sm font-medium ${
-                step.completed ? 'text-gray-500 line-through' : 'text-gray-700'
-              }`}>
-                {step.title}
-              </span>
+
+              {/* Step Content */}
+              <div className="pt-2">
+                <h4 className={`text-lg font-semibold mb-2 ${
+                  step.completed ? 'text-gray-500 line-through' : 'text-gray-900 group-hover:text-blue-600'
+                }`}>
+                  {step.title}
+                </h4>
+                
+                {/* Step Description */}
+                <p className="text-sm text-gray-600 mb-3">
+                  {index === 0 && "Discover existing knowledge and find what you need"}
+                  {index === 1 && "Learn to quickly find specific information across all content"}
+                  {index === 2 && "Understand important policies and compliance requirements"}
+                  {index === 3 && "Contribute your knowledge and help others learn"}
+                </p>
+
+                {/* Progress Indicator */}
+                <div className="flex items-center justify-between">
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    step.completed 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-blue-100 text-blue-800 group-hover:bg-blue-200'
+                  }`}>
+                    {step.completed ? '✓ Completed' : 'Get Started →'}
+                  </div>
+                  
+                  {!step.completed && (
+                    <div className="text-2xl group-hover:animate-bounce">
+                      {index === 0 && "🔍"}
+                      {index === 1 && "⚡"}
+                      {index === 2 && "📋"}
+                      {index === 3 && "✨"}
+                    </div>
+                  )}
+                </div>
+              </div>
             </Link>
           ))}
+        </div>
+
+        {/* Progress Summary */}
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center space-x-2 bg-white px-4 py-2 rounded-full shadow-sm border border-blue-200">
+            <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+              <span className="text-xs text-white font-bold">{completedSteps}</span>
+            </div>
+            <span className="text-sm font-medium text-blue-900">
+              {completedSteps}/{totalSteps} steps completed • {Math.round(progressPercentage)}% done!
+            </span>
+          </div>
         </div>
       </div>
 
