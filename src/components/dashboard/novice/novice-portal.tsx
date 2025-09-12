@@ -91,7 +91,7 @@ export function NovicePortal() {
       <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
         <h2 className="text-2xl font-bold mb-2">Welcome to the Knowledge Hub! 👋</h2>
         <p className="text-blue-100 mb-4">
-          Let&apos;s get you started with the essential information and resources you need to succeed.
+          Let&apos;s get you started with these 4 essential steps to unlock the full potential of our knowledge management system.
         </p>
         <div className="flex items-center space-x-4">
           <div className="flex-1">
@@ -103,7 +103,7 @@ export function NovicePortal() {
             </div>
           </div>
           <span className="text-sm font-medium">
-            {completedSteps}/{totalSteps} completed
+            {completedSteps}/{totalSteps} steps completed
           </span>
         </div>
       </div>

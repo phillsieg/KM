@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AppLayout } from '@/components/layout/app-layout'
 import { Button } from '@/components/ui/button'
+import { 
+  DocumentArrowUpIcon, 
+  PencilIcon, 
+  CloudArrowUpIcon,
+  DocumentIcon
+} from '@heroicons/react/24/outline'
 
 interface Domain {
   id: string
@@ -35,6 +41,8 @@ export default function CreateDocumentPage() {
   const router = useRouter()
   const [domains, setDomains] = useState<Domain[]>([])
   const [loading, setLoading] = useState(false)
+  const [activeTab, setActiveTab] = useState<'create' | 'upload'>('create')
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     summary: '',
@@ -79,6 +87,44 @@ export default function CreateDocumentPage() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setUploadedFile(file)
+      // Extract title from filename
+      const fileName = file.name.replace(/\.[^/.]+$/, "")
+      setFormData(prev => ({ 
+        ...prev, 
+        title: fileName,
+        contentType: getContentTypeFromFile(file.name)
+      }))
+      
+      // Read file content for supported types
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        const content = e.target?.result as string
+        if (file.type.includes('text') || file.name.endsWith('.md')) {
+          setFormData(prev => ({ ...prev, content }))
+        }
+      }
+      reader.readAsText(file)
+    }
+  }
+
+  const getContentTypeFromFile = (filename: string): string => {
+    const ext = filename.toLowerCase().split('.').pop()
+    switch (ext) {
+      case 'pdf': return 'POLICY'
+      case 'doc': 
+      case 'docx': return 'SOP'
+      case 'txt': 
+      case 'md': return 'STANDARD'
+      case 'xls':
+      case 'xlsx': return 'TEMPLATE'
+      default: return 'SOP'
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -116,6 +162,82 @@ export default function CreateDocumentPage() {
             Add a new document to the knowledge management system
           </p>
         </div>
+
+        {/* Tab Navigation */}
+        <div className="mb-6">
+          <div className="border-b border-gray-200">
+            <nav className="-mb-px flex space-x-8">
+              <button
+                type="button"
+                onClick={() => setActiveTab('create')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'create'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <PencilIcon className="h-4 w-4 inline mr-2" />
+                Create from Scratch
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('upload')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'upload'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <DocumentArrowUpIcon className="h-4 w-4 inline mr-2" />
+                Upload Document
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {activeTab === 'upload' && (
+          <div className="bg-white shadow rounded-lg p-6 mb-6">
+            <div className="text-center">
+              <div className="mt-4">
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <div className="mx-auto flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <CloudArrowUpIcon className="w-10 h-10 mb-3 text-gray-400" />
+                      <p className="mb-2 text-sm text-gray-500">
+                        <span className="font-semibold">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        PDF, DOC, DOCX, TXT, MD, XLS, XLSX (MAX. 10MB)
+                      </p>
+                    </div>
+                  </div>
+                </label>
+                <input
+                  id="file-upload"
+                  name="file-upload"
+                  type="file"
+                  className="sr-only"
+                  accept=".pdf,.doc,.docx,.txt,.md,.xls,.xlsx"
+                  onChange={handleFileUpload}
+                />
+              </div>
+              
+              {uploadedFile && (
+                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center justify-center">
+                    <DocumentIcon className="h-5 w-5 text-green-600 mr-2" />
+                    <span className="text-sm text-green-800 font-medium">
+                      {uploadedFile.name} ({(uploadedFile.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  </div>
+                  <p className="text-xs text-green-600 mt-1">
+                    File uploaded successfully! Fill in the details below and submit.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow rounded-lg p-6">
           <div>
@@ -256,6 +378,15 @@ export default function CreateDocumentPage() {
             <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
               Content *
             </label>
+            {uploadedFile && activeTab === 'upload' && !uploadedFile.type.includes('text') && !uploadedFile.name.endsWith('.md') && (
+              <div className="mb-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <p className="text-sm text-blue-800">
+                  <DocumentIcon className="h-4 w-4 inline mr-1" />
+                  <strong>Note:</strong> File content cannot be previewed for this file type. 
+                  The document will be stored as an attachment. Please provide a summary or description in the content field.
+                </p>
+              </div>
+            )}
             <textarea
               id="content"
               name="content"
@@ -264,7 +395,11 @@ export default function CreateDocumentPage() {
               value={formData.content}
               onChange={handleInputChange}
               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Enter the document content..."
+              placeholder={
+                uploadedFile && activeTab === 'upload' 
+                  ? "Add a description or summary of the uploaded document..."
+                  : "Enter the document content..."
+              }
             />
           </div>
 
@@ -277,7 +412,10 @@ export default function CreateDocumentPage() {
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Document'}
+              {loading 
+                ? (activeTab === 'upload' ? 'Uploading...' : 'Creating...') 
+                : (activeTab === 'upload' ? 'Upload Document' : 'Create Document')
+              }
             </Button>
           </div>
         </form>
