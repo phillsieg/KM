@@ -101,7 +101,7 @@ export default function TestSignUp() {
               <a href="/auth/signin" className="underline hover:no-underline">
                 go to sign in
               </a>{' '}
-              and use the "Sign in with Email" option.
+              and use the &quot;Sign in with Email&quot; option.
             </p>
           </div>
         )}
