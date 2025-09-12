@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-
-// Simple in-memory storage for testing (in production, this would be a database)
-const users: Array<{
-  id: string
-  email: string
-  name: string | null
-  password: string
-  role: string
-  createdAt: Date
-}> = []
+import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Simple signup endpoint called')
     const { email, password, name } = await request.json()
 
+    // Basic validation
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -30,8 +21,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user already exists
-    const existingUser = users.find(u => u.email === email)
+    console.log('Starting user creation process...')
+
+    // Check if user exists using raw SQL for reliability
+    let existingUser
+    try {
+      const users = await prisma.$queryRaw<Array<{ id: string, email: string }>>`
+        SELECT id, email FROM users WHERE email = ${email} LIMIT 1
+      `
+      existingUser = users[0]
+    } catch (queryError) {
+      console.log('User query failed, assuming table needs setup')
+      
+      // Try to ensure users table exists
+      try {
+        await prisma.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "users" (
+            "id" TEXT NOT NULL PRIMARY KEY,
+            "email" TEXT NOT NULL UNIQUE,
+            "name" TEXT,
+            "image" TEXT,
+            "password" TEXT,
+            "role" TEXT NOT NULL DEFAULT 'CONTRIBUTOR',
+            "emailVerified" TIMESTAMP(3),
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+          );
+        `
+        console.log('Users table created')
+      } catch (createError) {
+        console.error('Failed to create users table:', createError)
+        return NextResponse.json(
+          { error: 'Database setup failed', details: createError instanceof Error ? createError.message : 'Unknown error' },
+          { status: 500 }
+        )
+      }
+    }
+
     if (existingUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
@@ -42,40 +68,44 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create user
+    // Generate simple ID
     const userId = `user_${Date.now()}_${Math.random().toString(36).substring(7)}`
-    const user = {
-      id: userId,
-      email,
-      name: name || null,
-      password: hashedPassword,
-      role: 'CONTRIBUTOR',
-      createdAt: new Date()
+
+    // Insert user using raw SQL for maximum reliability
+    try {
+      await prisma.$executeRaw`
+        INSERT INTO users (id, email, name, password, role, "createdAt", "updatedAt")
+        VALUES (${userId}, ${email}, ${name || null}, ${hashedPassword}, 'CONTRIBUTOR', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `
+      
+      console.log('User created successfully with raw SQL')
+
+      return NextResponse.json({
+        message: 'User created successfully',
+        user: {
+          id: userId,
+          email,
+          name: name || null,
+          role: 'CONTRIBUTOR'
+        }
+      }, { status: 201 })
+
+    } catch (insertError) {
+      console.error('Failed to insert user:', insertError)
+      return NextResponse.json(
+        { 
+          error: 'Failed to create user',
+          details: insertError instanceof Error ? insertError.message : 'Unknown insert error'
+        },
+        { status: 500 }
+      )
     }
 
-    users.push(user)
-
-    console.log(`User created successfully: ${email}`)
-
-    return NextResponse.json(
-      { 
-        message: 'User created successfully (simple version)', 
-        user: {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          createdAt: user.createdAt
-        }
-      },
-      { status: 201 }
-    )
-
   } catch (error) {
-    console.error('Simple signup error:', error)
+    console.error('Signup error:', error)
     return NextResponse.json(
       { 
-        error: 'Internal server error in simple signup',
+        error: 'Internal server error',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
       { status: 500 }
