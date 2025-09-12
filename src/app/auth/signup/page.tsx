@@ -39,7 +39,7 @@ export default function SignUp() {
     }
 
     try {
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch('/api/auth/bulletproof-signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
