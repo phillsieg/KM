@@ -32,6 +32,8 @@ export default async function ContentPage({ params }: ContentPageProps) {
     DRAFT: 'bg-gray-100 text-gray-800',
     IN_REVIEW: 'bg-yellow-100 text-yellow-800',
     PUBLISHED: 'bg-green-100 text-green-800',
+    NEEDS_UPDATE: 'bg-orange-100 text-orange-800',
+    ARCHIVED: 'bg-blue-100 text-blue-800',
     DEPRECATED: 'bg-red-100 text-red-800'
   }
 
