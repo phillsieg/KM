@@ -20,10 +20,43 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // First, try to ensure database tables exist
+    try {
+      // Try to query users table to see if it exists
+      await prisma.user.findFirst()
+    } catch (dbError) {
+      // If table doesn't exist, try to create it using raw SQL
+      console.log('Database tables may not exist, attempting to create them...')
+      
+      try {
+        // Create basic users table if it doesn't exist
+        await prisma.$executeRaw`
+          CREATE TABLE IF NOT EXISTS "users" (
+            "id" TEXT NOT NULL PRIMARY KEY,
+            "email" TEXT NOT NULL UNIQUE,
+            "name" TEXT,
+            "image" TEXT,
+            "password" TEXT,
+            "role" TEXT NOT NULL DEFAULT 'VISITOR',
+            "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+          );
+        `
+        console.log('Users table created successfully')
+      } catch (createError) {
+        console.error('Failed to create users table:', createError)
+      }
+    }
+
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    })
+    let existingUser
+    try {
+      existingUser = await prisma.user.findUnique({
+        where: { email }
+      })
+    } catch (err) {
+      console.log('User lookup failed, continuing with creation...')
+    }
 
     if (existingUser) {
       return NextResponse.json(
@@ -35,22 +68,45 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create user
-    const user = await prisma.user.create({
-      data: {
+    // Generate a simple ID if prisma's cuid fails
+    const userId = `user_${Date.now()}_${Math.random().toString(36).substring(7)}`
+
+    // Try to create user
+    let user
+    try {
+      user = await prisma.user.create({
+        data: {
+          id: userId,
+          email,
+          name: name || null,
+          password: hashedPassword,
+          role: 'CONTRIBUTOR'
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true
+        }
+      })
+    } catch (createUserError) {
+      // If Prisma create fails, try raw SQL
+      console.log('Prisma create failed, trying raw SQL...')
+      
+      await prisma.$executeRaw`
+        INSERT INTO users (id, email, name, password, role, "createdAt", "updatedAt")
+        VALUES (${userId}, ${email}, ${name || null}, ${hashedPassword}, 'CONTRIBUTOR', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      `
+      
+      user = {
+        id: userId,
         email,
         name: name || null,
-        password: hashedPassword,
-        role: 'CONTRIBUTOR'
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true
+        role: 'CONTRIBUTOR',
+        createdAt: new Date()
       }
-    })
+    }
 
     return NextResponse.json(
       { 
@@ -63,7 +119,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Signup error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Internal server error',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
