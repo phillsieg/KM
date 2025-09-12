@@ -12,7 +12,7 @@ export default function TestSignUp() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [response, setResponse] = useState<any>(null)
+  const [response, setResponse] = useState<Record<string, unknown> | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
