@@ -155,15 +155,6 @@ function ContentHealthChart() {
 function KnowledgeGapsWidget() {
   const { knowledgeGaps } = kpiData
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800'
-      case 'medium': return 'bg-yellow-100 text-yellow-800'
-      case 'low': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200">
       <div className="flex items-center justify-between mb-4">

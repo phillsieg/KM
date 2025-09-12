@@ -16,7 +16,6 @@ import {
   TrashIcon,
   ArchiveBoxIcon,
   ShieldCheckIcon,
-  ExclamationTriangleIcon,
   InformationCircleIcon,
   ChevronDownIcon,
   ChevronRightIcon,
@@ -37,9 +36,9 @@ interface AuditEntry {
   timestamp: Date
   ipAddress?: string
   userAgent?: string
-  oldValues?: Record<string, any>
-  newValues?: Record<string, any>
-  metadata?: Record<string, any>
+  oldValues?: Record<string, unknown>
+  newValues?: Record<string, unknown>
+  metadata?: Record<string, unknown>
   description?: string
   category: 'content' | 'access' | 'approval' | 'system' | 'compliance' | 'security'
   severity: 'low' | 'medium' | 'high' | 'critical'
@@ -213,20 +212,16 @@ const categoryConfig = {
 
 interface AuditTrailProps {
   resourceId?: string
-  resourceType?: string
   userId?: string
   showDecisions?: boolean
-  compact?: boolean
   limit?: number
   className?: string
 }
 
 export function AuditTrail({
   resourceId,
-  resourceType,
   userId,
   showDecisions = true,
-  compact = false,
   limit,
   className = ''
 }: AuditTrailProps) {
@@ -523,12 +518,10 @@ export function AuditTrail({
 
 // Compact audit summary for cards
 export function AuditSummary({
-  resourceId,
   lastActivity,
   totalEvents,
   className = ''
 }: {
-  resourceId: string
   lastActivity?: Date
   totalEvents?: number
   className?: string

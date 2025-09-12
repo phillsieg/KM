@@ -3,7 +3,6 @@
 import {
   DocumentCheckIcon,
   ClockIcon,
-  UserGroupIcon,
   ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline'
 import { CompactContentCard } from '@/components/content/content-card'

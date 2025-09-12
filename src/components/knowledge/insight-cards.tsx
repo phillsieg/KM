@@ -12,6 +12,7 @@ import {
   EyeIcon,
   BookmarkIcon,
   ShareIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolidIcon, BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid'
 import { Badge } from '@/components/ui/badge'

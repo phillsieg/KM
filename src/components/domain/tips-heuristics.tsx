@@ -128,9 +128,9 @@ interface TipsHeuristicsProps {
   domainName: string
 }
 
-export function TipsHeuristics({ domainId, domainName }: TipsHeuristicsProps) {
+export function TipsHeuristics({ domainName }: TipsHeuristicsProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [showAddForm, setShowAddForm] = useState(false)
+  const [, setShowAddForm] = useState(false)
   const [tips, setTips] = useState<TipHeuristic[]>(mockTips)
 
   const filteredTips = selectedCategory === 'all' 

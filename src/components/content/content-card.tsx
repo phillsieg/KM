@@ -47,7 +47,6 @@ interface ContentCardProps {
 }
 
 export function ContentCard({
-  id,
   title,
   summary,
   contentType,
@@ -58,7 +57,6 @@ export function ContentCard({
   steward,
   approvedBy,
   views,
-  createdAt,
   updatedAt,
   publishedAt,
   nextReviewDate,
@@ -226,7 +224,6 @@ interface CompactContentCardProps {
 }
 
 export function CompactContentCard({
-  id,
   title,
   contentType,
   lifecycleState,

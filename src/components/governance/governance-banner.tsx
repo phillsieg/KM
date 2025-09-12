@@ -3,13 +3,11 @@
 import {
   CheckCircleIcon,
   ShieldCheckIcon,
-  DocumentCheckIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
   ClockIcon,
   EyeIcon,
   LinkIcon,
-  UserIcon,
   CalendarDaysIcon,
 } from '@heroicons/react/24/outline'
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/react/24/solid'
