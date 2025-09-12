@@ -122,7 +122,7 @@ function SignInContent() {
               </div>
 
               <div className="text-center">
-                <Link href="/test-signup" className="text-blue-600 hover:text-blue-500 text-sm">
+                <Link href="/auth/signup" className="text-blue-600 hover:text-blue-500 text-sm">
                   Don&apos;t have an account? Sign up
                 </Link>
               </div>

@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Generate a simple ID if prisma's cuid fails
+    // Generate a simple ID
     const userId = `user_${Date.now()}_${Math.random().toString(36).substring(7)}`
 
     // Try to create user
