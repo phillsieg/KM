@@ -95,7 +95,14 @@ export default function TestSignUp() {
         
         {success && (
           <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded">
-            Account created successfully! (Test mode)
+            <h3 className="font-medium">Account created successfully! (Test mode)</h3>
+            <p className="mt-2 text-sm">
+              Your test account has been created. You can now{' '}
+              <a href="/auth/signin" className="underline hover:no-underline">
+                go to sign in
+              </a>{' '}
+              and use the "Sign in with Email" option.
+            </p>
           </div>
         )}
 
