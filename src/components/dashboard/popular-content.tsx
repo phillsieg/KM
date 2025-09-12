@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { EyeIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
-import { formatRelativeTime, getLifecycleStateColor } from '@/lib/utils'
+import { formatRelativeTime } from '@/lib/utils'
+import { LifecycleStateBadge, ContentTypeBadge } from '@/components/ui/badge'
 
 const mockPopularContent = [
   {
@@ -88,15 +89,11 @@ export function PopularContent() {
                   </Link>
                   
                   <div className="flex items-center space-x-2 mt-1">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {item.type}
-                    </span>
+                    <ContentTypeBadge type={item.type} size="sm" />
                     <span className="text-xs text-gray-500">
                       {item.domain}
                     </span>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getLifecycleStateColor(item.lifecycleState)}`}>
-                      {item.lifecycleState.replace('_', ' ')}
-                    </span>
+                    <LifecycleStateBadge state={item.lifecycleState} size="sm" />
                   </div>
                   
                   <div className="flex items-center space-x-3 mt-2 text-xs text-gray-500">

@@ -21,10 +21,14 @@ model User {
   sessions        Session[]
   ownedContent    Content[] @relation("ContentOwner")
   authoredContent Content[] @relation("ContentAuthor")
+  stewardedContent Content[] @relation("ContentSteward")
+  approvedContent Content[] @relation("ContentApprover")
   reviewTasks     ReviewTask[]
   comments        Comment[]
   savedSearches   SavedSearch[]
   subscriptions   Subscription[]
+  tipsHeuristics  TipHeuristic[]
+  insightCards    InsightCard[]
   
   @@map("users")
 }
@@ -79,7 +83,9 @@ model Domain {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
-  content     Content[]
+  content        Content[]
+  tipsHeuristics TipHeuristic[]
+  insightCards   InsightCard[]
   
   @@map("domains")
 }
@@ -99,10 +105,17 @@ model Content {
   domainId        String
   ownerId         String
   authorId        String
+  stewardId       String?
+  approvedById    String?
+  approvedAt      DateTime?
+  linkedRegulations Json?
+  decisionRationale String?        @db.Text
   
   domain          Domain          @relation(fields: [domainId], references: [id])
   owner           User            @relation("ContentOwner", fields: [ownerId], references: [id])
   author          User            @relation("ContentAuthor", fields: [authorId], references: [id])
+  steward         User?           @relation("ContentSteward", fields: [stewardId], references: [id])
+  approvedBy      User?           @relation("ContentApprover", fields: [approvedById], references: [id])
   
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -120,6 +133,7 @@ model Content {
   attachments     Attachment[]
   analytics       ContentAnalytics[]
   subscriptions   Subscription[]
+  insightCards    InsightCard[]
   
   @@map("content")
 }
@@ -282,6 +296,49 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model TipHeuristic {
+  id          String   @id @default(cuid())
+  domainId    String
+  authorId    String
+  title       String
+  content     String   @db.Text
+  category    TipCategory @default(TIP)
+  upvotes     Int      @default(0)
+  downvotes   Int      @default(0)
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  domain      Domain   @relation(fields: [domainId], references: [id])
+  author      User     @relation(fields: [authorId], references: [id])
+  
+  @@map("tips_heuristics")
+}
+
+model InsightCard {
+  id            String   @id @default(cuid())
+  domainId      String?
+  contentId     String?
+  authorId      String
+  title         String
+  description   String   @db.Text
+  lessonLearned String   @db.Text
+  gotchas       String?  @db.Text
+  bestPractices String?  @db.Text
+  tags          Json?
+  upvotes       Int      @default(0)
+  downvotes     Int      @default(0)
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  domain        Domain?  @relation(fields: [domainId], references: [id])
+  content       Content? @relation(fields: [contentId], references: [id])
+  author        User     @relation(fields: [authorId], references: [id])
+  
+  @@map("insight_cards")
+}
+
 enum UserRole {
   VISITOR
   CONTRIBUTOR
@@ -308,6 +365,8 @@ enum LifecycleState {
   DRAFT
   IN_REVIEW
   PUBLISHED
+  NEEDS_UPDATE
+  ARCHIVED
   DEPRECATED
 }
 
@@ -358,4 +417,12 @@ enum AnalyticsEvent {
   SEARCH
   BOOKMARK
   SHARE
+}
+
+enum TipCategory {
+  TIP
+  HEURISTIC
+  BEST_PRACTICE
+  GOTCHA
+  WORKAROUND
 }

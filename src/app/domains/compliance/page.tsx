@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/app-layout'
+import { TipsHeuristics } from '@/components/domain/tips-heuristics'
 
 export default function CompliancePage() {
   return (
@@ -100,6 +101,9 @@ export default function CompliancePage() {
             </div>
           </div>
         </div>
+
+        {/* Tips & Heuristics Section */}
+        <TipsHeuristics domainId="compliance" domainName="Compliance" />
       </div>
     </AppLayout>
   )

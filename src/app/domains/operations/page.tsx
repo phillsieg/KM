@@ -1,4 +1,5 @@
 import { AppLayout } from '@/components/layout/app-layout'
+import { TipsHeuristics } from '@/components/domain/tips-heuristics'
 
 export default function OperationsPage() {
   return (
@@ -86,6 +87,9 @@ export default function OperationsPage() {
             </p>
           </div>
         </div>
+
+        {/* Tips & Heuristics Section */}
+        <TipsHeuristics domainId="operations" domainName="Operations" />
       </div>
     </AppLayout>
   )

@@ -83,7 +83,13 @@ export async function POST(request: NextRequest) {
       console.log('User created successfully')
 
       // Verify user was created
-      const createdUsers = await prisma.$queryRaw<any[]>`
+      const createdUsers = await prisma.$queryRaw<{
+        id: string;
+        email: string;
+        name: string | null;
+        role: string;
+        createdAt: Date;
+      }[]>`
         SELECT id, email, name, role, "createdAt" FROM users WHERE id = ${userId}
       `
 
