@@ -12,10 +12,10 @@ import {
 
 const quickStartData = {
   welcomeSteps: [
-    { id: 1, title: 'Complete Your Profile', completed: false, href: '/profile' },
-    { id: 2, title: 'Take the Platform Tour', completed: false, href: '/tour' },
+    { id: 1, title: 'Explore the Knowledge Base', completed: false, href: '/browse' },
+    { id: 2, title: 'Search for Information', completed: false, href: '/search' },
     { id: 3, title: 'Read Company Policies', completed: false, href: '/domains/compliance' },
-    { id: 4, title: 'Join Your Team Domain', completed: false, href: '/domains' },
+    { id: 4, title: 'Create Your First Content', completed: false, href: '/create' },
   ],
   learningPaths: [
     {
@@ -25,25 +25,25 @@ const quickStartData = {
       duration: '2 hours',
       progress: 0,
       modules: 8,
-      href: '/learning/new-employee',
+      href: '/domains/compliance',
     },
     {
       id: '2',
-      title: 'Safety and Compliance Basics',
-      description: 'Essential safety protocols and compliance requirements',
+      title: 'Safety and Operations',
+      description: 'Essential safety protocols and operational procedures',
       duration: '1.5 hours',
       progress: 0,
       modules: 6,
-      href: '/learning/safety-compliance',
+      href: '/domains/operations',
     },
     {
       id: '3',
-      title: 'Department-Specific Training',
-      description: 'Role-specific knowledge and procedures',
+      title: 'Technical Documentation',
+      description: 'Engineering standards and best practices',
       duration: '3 hours',
       progress: 0,
       modules: 12,
-      href: '/learning/department-training',
+      href: '/domains/engineering',
     },
   ],
   expertContacts: [
@@ -174,10 +174,10 @@ export function NovicePortal() {
 
           <div className="mt-4 pt-4 border-t border-gray-200">
             <Link
-              href="/learning"
+              href="/browse"
               className="text-sm font-medium text-blue-600 hover:text-blue-800"
             >
-              Browse all learning paths →
+              Browse all content →
             </Link>
           </div>
         </div>
@@ -235,10 +235,10 @@ export function NovicePortal() {
 
           <div className="mt-4 pt-4 border-t border-gray-200">
             <Link
-              href="/experts"
+              href="/browse"
               className="text-sm font-medium text-blue-600 hover:text-blue-800"
             >
-              View all experts →
+              Browse knowledge domains →
             </Link>
           </div>
         </div>
@@ -280,33 +280,33 @@ export function NovicePortal() {
             </Link>
             
             <Link
-              href="/domains"
+              href="/browse"
               className="flex flex-col items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-center"
             >
               <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mb-2">
                 <span className="text-sm">📚</span>
               </div>
-              <span className="text-xs font-medium text-gray-700">Domains</span>
+              <span className="text-xs font-medium text-gray-700">Browse</span>
             </Link>
             
             <Link
-              href="/help"
+              href="/create"
               className="flex flex-col items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-center"
             >
               <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center mb-2">
-                <span className="text-sm">❓</span>
+                <span className="text-sm">➕</span>
               </div>
-              <span className="text-xs font-medium text-gray-700">Help</span>
+              <span className="text-xs font-medium text-gray-700">Create</span>
             </Link>
             
             <Link
-              href="/feedback"
+              href="/bookmarks"
               className="flex flex-col items-center p-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-center"
             >
               <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mb-2">
-                <span className="text-sm">💬</span>
+                <span className="text-sm">🔖</span>
               </div>
-              <span className="text-xs font-medium text-gray-700">Feedback</span>
+              <span className="text-xs font-medium text-gray-700">Bookmarks</span>
             </Link>
           </div>
         </div>
