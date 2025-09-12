@@ -5,8 +5,8 @@ import {
   DocumentCheckIcon,
   ExclamationTriangleIcon,
   ClockIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   UserGroupIcon,
   BookOpenIcon,
 } from '@heroicons/react/24/outline'
@@ -53,7 +53,7 @@ function MetricCard({ title, value, subtitle, trend, trendValue, icon: Icon, col
   icon: React.ElementType
   color: string
 }) {
-  const TrendIcon = trend === 'up' ? TrendingUpIcon : trend === 'down' ? TrendingDownIcon : null
+  const TrendIcon = trend === 'up' ? ArrowTrendingUpIcon : trend === 'down' ? ArrowTrendingDownIcon : null
 
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200">
