@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
         SELECT id, email FROM users WHERE email = ${email} LIMIT 1
       `
       existingUser = users[0]
-    } catch (queryError) {
+    } catch {
       console.log('User query failed, assuming table needs setup')
       
       // Try to ensure users table exists
@@ -114,9 +114,22 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json({
-    message: 'Simple signup endpoint - POST to create user',
-    usersCount: users.length,
-    users: users.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role }))
-  })
+  try {
+    const users = await prisma.$queryRaw<Array<{ id: string, email: string, name: string | null, role: string }>>`
+      SELECT id, email, name, role FROM users
+    `
+
+    return NextResponse.json({
+      message: 'Simple signup endpoint - POST to create user',
+      usersCount: users.length,
+      users: users.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role }))
+    })
+  } catch {
+    return NextResponse.json({
+      message: 'Simple signup endpoint - POST to create user',
+      usersCount: 0,
+      users: [],
+      error: 'Could not fetch users'
+    })
+  }
 }

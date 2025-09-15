@@ -61,7 +61,7 @@ export default function SignUp() {
       } else {
         setError(data.error || 'An error occurred during signup')
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred during signup')
     } finally {
       setLoading(false)

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     try {
       // Try to query users table to see if it exists
       await prisma.user.findFirst()
-    } catch (dbError) {
+    } catch {
       // If table doesn't exist, try to create it using raw SQL
       console.log('Database tables may not exist, attempting to create them...')
       
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       existingUser = await prisma.user.findUnique({
         where: { email }
       })
-    } catch (err) {
+    } catch {
       console.log('User lookup failed, continuing with creation...')
     }
 
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
           createdAt: true
         }
       })
-    } catch (createUserError) {
+    } catch {
       // If Prisma create fails, try raw SQL
       console.log('Prisma create failed, trying raw SQL...')
       

@@ -26,8 +26,8 @@ function SignInContent() {
       if (result?.ok) {
         router.push(callbackUrl)
       }
-    } catch (err) {
-      console.error('Sign in error:', err)
+    } catch {
+      console.error('Sign in error')
     } finally {
       setIsLoading(false)
     }
@@ -51,7 +51,7 @@ function SignInContent() {
         router.push(callbackUrl)
         router.refresh()
       }
-    } catch (err) {
+    } catch {
       setError('An error occurred during sign in')
     } finally {
       setIsLoading(false)
