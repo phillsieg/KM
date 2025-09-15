@@ -121,7 +121,7 @@ export function DomainContentList({
                 {domainName}
               </h3>
               <p className="text-lg font-medium text-gray-900">
-                {content.length > 0 ? `${content.length} documents` : 'Loading...'}
+                {content.length > 0 ? `${content.length} documents` : 'Click to expand'}
               </p>
             </div>
           </div>
@@ -140,7 +140,7 @@ export function DomainContentList({
         <div className="border-t border-gray-200">
           {loading && (
             <div className="p-4 text-center text-gray-500">
-              <div className="animate-pulse">Loading documents...</div>
+              <div className="animate-pulse">Checking for documents...</div>
             </div>
           )}
 
