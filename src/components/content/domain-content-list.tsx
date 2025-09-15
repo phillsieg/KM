@@ -51,13 +51,27 @@ export function DomainContentList({
 
     try {
       const response = await fetch(`/api/content?domain=${domainId}&public=true`)
+
+      if (response.status === 503) {
+        throw new Error('Database connection failed. Please try again later.')
+      }
+
       if (!response.ok) {
-        throw new Error('Failed to fetch content')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `Failed to fetch content (${response.status})`)
       }
 
       const data = await response.json()
-      setContent(data)
+      // Handle both array and error object responses
+      if (Array.isArray(data)) {
+        setContent(data)
+      } else if (data.error) {
+        throw new Error(data.error)
+      } else {
+        setContent([])
+      }
     } catch (err) {
+      console.error('Content fetch error:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setLoading(false)
@@ -131,8 +145,16 @@ export function DomainContentList({
           )}
 
           {error && (
-            <div className="p-4 text-center text-red-500">
-              Error: {error}
+            <div className="p-4 text-center">
+              <div className="text-red-500 mb-2">
+                {error}
+              </div>
+              <button
+                onClick={fetchContent}
+                className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 border border-blue-300 rounded hover:bg-blue-50"
+              >
+                Retry
+              </button>
             </div>
           )}
 

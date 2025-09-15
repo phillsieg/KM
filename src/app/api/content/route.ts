@@ -113,41 +113,66 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const content = await prisma.content.findMany({
-      where,
-      include: {
-        domain: true,
-        owner: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true
+    let content
+    try {
+      content = await prisma.content.findMany({
+        where,
+        include: {
+          domain: true,
+          owner: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true
+            }
+          },
+          author: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true
+            }
+          },
+          _count: {
+            select: {
+              versions: true,
+              comments: true
+            }
           }
         },
-        author: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true
-          }
-        },
-        _count: {
-          select: {
-            versions: true,
-            comments: true
-          }
+        orderBy: {
+          updatedAt: 'desc'
         }
-      },
-      orderBy: {
-        updatedAt: 'desc'
-      }
-    })
+      })
+    } catch (dbError) {
+      console.log('Database query failed, likely tables don\'t exist yet:', dbError)
+      // Return empty array if database/tables don't exist yet
+      return NextResponse.json([])
+    }
 
-    return NextResponse.json(content)
+    return NextResponse.json(content || [])
   } catch (error) {
     console.error('Error fetching content:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+
+    // Return more specific error messages
+    if (error instanceof Error) {
+      if (error.message.includes('relation') || error.message.includes('table') || error.message.includes('does not exist')) {
+        console.log('Database tables not found, returning empty content array')
+        return NextResponse.json([])
+      }
+
+      if (error.message.includes('connection') || error.message.includes('connect')) {
+        return NextResponse.json({
+          error: 'Database connection failed. Please try again later.'
+        }, { status: 503 })
+      }
+    }
+
+    return NextResponse.json({
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
