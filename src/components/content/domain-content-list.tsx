@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { ChevronDownIcon, ChevronRightIcon, DocumentTextIcon } from '@heroicons/react/24/outline'
 
 interface Content {
@@ -45,18 +45,12 @@ export function DomainContentList({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (isExpanded && content.length === 0) {
-      fetchContent()
-    }
-  }, [isExpanded, domainId])
-
-  const fetchContent = async () => {
+  const fetchContent = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      const response = await fetch(`/api/content?domain=${domainId}`)
+      const response = await fetch(`/api/content?domain=${domainId}&public=true`)
       if (!response.ok) {
         throw new Error('Failed to fetch content')
       }
@@ -68,21 +62,28 @@ export function DomainContentList({
     } finally {
       setLoading(false)
     }
-  }
+  }, [domainId])
+
+  useEffect(() => {
+    if (isExpanded && content.length === 0) {
+      fetchContent()
+    }
+  }, [isExpanded, content.length, fetchContent])
 
   const getLifecycleStateBadge = (state: string) => {
     const stateStyles = {
       DRAFT: 'bg-gray-100 text-gray-800',
-      REVIEW: 'bg-yellow-100 text-yellow-800',
-      APPROVED: 'bg-green-100 text-green-800',
-      PUBLISHED: 'bg-blue-100 text-blue-800',
-      ARCHIVED: 'bg-red-100 text-red-800'
+      IN_REVIEW: 'bg-yellow-100 text-yellow-800',
+      PUBLISHED: 'bg-green-100 text-green-800',
+      NEEDS_UPDATE: 'bg-orange-100 text-orange-800',
+      ARCHIVED: 'bg-red-100 text-red-800',
+      DEPRECATED: 'bg-red-100 text-red-800'
     }
 
     return stateStyles[state as keyof typeof stateStyles] || 'bg-gray-100 text-gray-800'
   }
 
-  const getContentTypeIcon = (type: string) => {
+  const getContentTypeIcon = () => {
     return <DocumentTextIcon className="h-4 w-4" />
   }
 
@@ -137,7 +138,7 @@ export function DomainContentList({
 
           {!loading && !error && content.length === 0 && (
             <div className="p-4 text-center text-gray-500">
-              No documents found in this domain.
+              No published documents found in this domain.
             </div>
           )}
 
@@ -147,7 +148,7 @@ export function DomainContentList({
                 <div key={item.id} className="p-4 hover:bg-gray-50">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 pt-1">
-                      {getContentTypeIcon(item.contentType)}
+                      {getContentTypeIcon()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">

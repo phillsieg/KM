@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { ContentType, Sensitivity } from '@prisma/client'
+import { ContentType, Sensitivity, LifecycleState } from '@prisma/client'
+import type { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,27 +93,46 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const { searchParams } = new URL(request.url)
     const domainId = searchParams.get('domain')
     const contentType = searchParams.get('type')
     const status = searchParams.get('status')
+    const publicOnly = searchParams.get('public') === 'true'
 
-    const where: Record<string, string> = {}
+    // Build where clause
+    const where: Prisma.ContentWhereInput = {}
     if (domainId) where.domainId = domainId
-    if (contentType) where.contentType = contentType.toUpperCase()
-    if (status) where.lifecycleState = status.toUpperCase()
+    if (contentType) where.contentType = contentType.toUpperCase() as ContentType
+    if (status) where.lifecycleState = status.toUpperCase() as LifecycleState
+
+    // If not authenticated, only show published content
+    if (!session?.user?.email || publicOnly) {
+      where.lifecycleState = 'PUBLISHED'
+      where.sensitivity = {
+        in: ['PUBLIC', 'INTERNAL']
+      }
+    }
 
     const content = await prisma.content.findMany({
       where,
       include: {
         domain: true,
-        owner: true,
-        author: true,
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
+        author: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          }
+        },
         _count: {
           select: {
             versions: true,
