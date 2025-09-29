@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
+export async function GET() {
+  return runMigration()
+}
+
 export async function POST() {
+  return runMigration()
+}
+
+async function runMigration() {
   try {
     console.log('Starting Supabase database migration...')
 

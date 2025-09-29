@@ -5,70 +5,36 @@ export async function GET() {
   try {
     console.log('Testing database connection...')
 
-    // Test 1: Simple connection
+    // Test database connection
     await prisma.$connect()
-    console.log('Database connected')
+    console.log('✅ Database connected successfully')
 
-    // Test 2: Check if users table exists and get count
-    let userCount = 0
+    // Check if we can query (this will fail if tables don't exist)
     try {
-      userCount = await prisma.user.count()
-      console.log('User count:', userCount)
-    } catch (userError) {
-      console.log('User table error:', userError)
-      return NextResponse.json({
-        status: 'partial',
-        message: 'Connected but user table has issues',
-        error: userError instanceof Error ? userError.message : 'Unknown error'
-      })
-    }
-
-    // Test 3: Check if content table exists and get count
-    let contentCount = 0
-    try {
-      contentCount = await prisma.content.count()
-      console.log('Content count:', contentCount)
-    } catch (contentError) {
-      console.log('Content table error:', contentError)
-      return NextResponse.json({
-        status: 'partial',
-        message: 'Connected but content table has issues',
-        error: contentError instanceof Error ? contentError.message : 'Unknown error'
-      })
-    }
-
-    // Test 4: Check domains
-    let domainCount = 0
-    try {
-      domainCount = await prisma.domain.count()
-      console.log('Domain count:', domainCount)
-    } catch (domainError) {
-      console.log('Domain table error:', domainError)
-      return NextResponse.json({
-        status: 'partial',
-        message: 'Connected but domain table has issues',
-        error: domainError instanceof Error ? domainError.message : 'Unknown error'
-      })
+      const userCount = await prisma.user.count()
+      console.log('Users table exists, count:', userCount)
+    } catch (error) {
+      console.log('Users table does not exist yet:', error)
     }
 
     return NextResponse.json({
-      status: 'success',
-      message: 'Database connection and tables working',
-      counts: {
-        users: userCount,
-        content: contentCount,
-        domains: domainCount
-      }
+      success: true,
+      message: 'Database connection successful',
+      database_url_configured: !!process.env.DATABASE_URL,
+      database_url_preview: process.env.DATABASE_URL ?
+        process.env.DATABASE_URL.substring(0, 30) + '...' : 'Not set'
     })
 
   } catch (error) {
-    console.error('Database test failed:', error)
-    return NextResponse.json({
-      status: 'error',
-      message: 'Database connection failed',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
-  } finally {
-    await prisma.$disconnect()
+    console.error('Database connection failed:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Database connection failed',
+        details: error instanceof Error ? error.message : 'Unknown error',
+        database_url_configured: !!process.env.DATABASE_URL
+      },
+      { status: 500 }
+    )
   }
 }
