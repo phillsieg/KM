@@ -42,7 +42,7 @@ function SignInContent() {
 
       if (supabaseError) {
         setError(supabaseError.message || 'Invalid email or password')
-      } else if (data.user) {
+      } else if (data?.user) {
         router.push(callbackUrl)
       }
     } catch {
