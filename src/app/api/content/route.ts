@@ -1,31 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/lib/auth'
+import { getAuthUser } from '@/lib/server-auth'
 import { prisma } from '@/lib/prisma'
 import { ContentType, Sensitivity, LifecycleState } from '@prisma/client'
 import type { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    
-    if (!session?.user?.email) {
+    const authUser = await getAuthUser(request)
+
+    if (!authUser?.email) {
       return NextResponse.json({ error: 'Unauthorized - Please log in first' }, { status: 401 })
     }
 
     // Try to find user, create if doesn't exist
     let user = await prisma.user.findUnique({
-      where: { email: session.user.email }
+      where: { email: authUser.email }
     })
 
     if (!user) {
-      console.log('User not found, creating new user:', session.user.email)
+      console.log('User not found, creating new user:', authUser.email)
       user = await prisma.user.create({
         data: {
-          email: session.user.email,
-          name: session.user.name || null,
-          image: session.user.image || null,
-          role: 'CONTRIBUTOR'
+          id: authUser.id,
+          email: authUser.email,
+          name: authUser.name || null,
+          image: authUser.image || null,
+          role: authUser.email === 'admin@metrics-llc.com' ? 'ADMIN' : 'CONTRIBUTOR'
         }
       })
     }

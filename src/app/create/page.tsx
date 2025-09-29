@@ -130,7 +130,8 @@ export default function CreateDocumentPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/content', {
+      const { authenticatedFetch } = await import('@/lib/api-client')
+      const response = await authenticatedFetch('/api/content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
