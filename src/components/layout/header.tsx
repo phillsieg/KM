@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useSession, signOut } from 'next-auth/react'
+import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { 
   MagnifyingGlassIcon, 
@@ -19,7 +19,7 @@ import { MegaMenu } from './mega-menu'
 import { MobileSidebar } from './mobile-sidebar'
 
 export function Header() {
-  const { data: session } = useSession()
+  const { user, loading, signOut } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
@@ -78,19 +78,19 @@ export function Header() {
             </button>
 
             {/* User menu */}
-            {session?.user ? (
+            {user ? (
               <Menu as="div" className="relative">
                 <Menu.Button className="flex items-center space-x-2 text-sm rounded-full p-1 hover:bg-gray-50">
-                  {session.user.image ? (
+                  {user.image ? (
                     <img
                       className="h-8 w-8 rounded-full"
-                      src={session.user.image}
-                      alt={session.user.name || ''}
+                      src={user.image}
+                      alt={user.name || ''}
                     />
                   ) : (
                     <div className="h-8 w-8 rounded-full bg-gray-300 flex items-center justify-center">
                       <span className="text-sm font-medium text-gray-700">
-                        {getInitials(session.user.name || session.user.email || '')}
+                        {getInitials(user.name || user.email || '')}
                       </span>
                     </div>
                   )}
@@ -108,10 +108,10 @@ export function Header() {
                 >
                   <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                      <div className="font-medium">{session.user.name}</div>
-                      <div className="text-gray-500">{session.user.email}</div>
+                      <div className="font-medium">{user.name}</div>
+                      <div className="text-gray-500">{user.email}</div>
                     </div>
-                    
+
                     <Menu.Item>
                       {({ active }) => (
                         <Link
@@ -125,7 +125,7 @@ export function Header() {
                         </Link>
                       )}
                     </Menu.Item>
-                    
+
                     <Menu.Item>
                       {({ active }) => (
                         <Link
@@ -139,7 +139,7 @@ export function Header() {
                         </Link>
                       )}
                     </Menu.Item>
-                    
+
                     <Menu.Item>
                       {({ active }) => (
                         <button
@@ -156,6 +156,8 @@ export function Header() {
                   </Menu.Items>
                 </Transition>
               </Menu>
+            ) : loading ? (
+              <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse"></div>
             ) : (
               <Link
                 href="/auth/signin"
