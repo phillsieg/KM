@@ -3,7 +3,7 @@ import { getAuthUser } from '@/lib/server-auth'
 import { prisma } from '@/lib/prisma'
 import { ContentType, LifecycleState, Sensitivity } from '@prisma/client'
 
-export async function POST(request: NextRequest) {
+async function debugContentCreation(request: NextRequest) {
   try {
     console.log('=== DEBUG CONTENT CREATION ===')
 
@@ -70,4 +70,12 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+export async function POST(request: NextRequest) {
+  return debugContentCreation(request)
+}
+
+export async function GET(request: NextRequest) {
+  return debugContentCreation(request)
 }
