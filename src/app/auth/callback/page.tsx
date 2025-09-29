@@ -14,7 +14,7 @@ export default function AuthCallback() {
         return
       }
 
-      const { data, error } = await supabase.auth.getSession()
+      const { data, error } = await supabase!.auth.getSession()
 
       if (error) {
         console.error('Error getting session:', error)
