@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, Suspense } from 'react'
+import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'
+import { supabase } from '@/lib/supabase'
 
 function SignInContent() {
   const [isLoading, setIsLoading] = useState(false)
@@ -20,12 +22,28 @@ function SignInContent() {
     setIsLoading(true)
     setError('')
     try {
-      const { error: supabaseError } = await signInWithGoogle()
-      if (supabaseError) {
-        setError('Failed to sign in with Google')
+      if (supabase) {
+        // Use Supabase if configured
+        const { error: supabaseError } = await signInWithGoogle()
+        if (supabaseError) {
+          setError('Failed to sign in with Google')
+          setIsLoading(false)
+        }
+        // If successful, the redirect will happen automatically via the callback
+      } else {
+        // Fall back to NextAuth if Supabase not configured
+        const result = await signIn('google', {
+          callbackUrl,
+          redirect: false,
+        })
+
+        if (result?.ok) {
+          router.push(callbackUrl)
+        } else {
+          setError('Failed to sign in with Google')
+        }
         setIsLoading(false)
       }
-      // If successful, the redirect will happen automatically via the callback
     } catch {
       setError('An error occurred during sign in')
       setIsLoading(false)
@@ -38,12 +56,29 @@ function SignInContent() {
     setError('')
 
     try {
-      const { data, error: supabaseError } = await signInWithEmail(email, password)
+      if (supabase) {
+        // Use Supabase if configured
+        const { data, error: supabaseError } = await signInWithEmail(email, password)
 
-      if (supabaseError) {
-        setError(supabaseError.message || 'Invalid email or password')
-      } else if (data?.user) {
-        router.push(callbackUrl)
+        if (supabaseError) {
+          setError(supabaseError.message || 'Invalid email or password')
+        } else if (data?.user) {
+          router.push(callbackUrl)
+        }
+      } else {
+        // Fall back to NextAuth credentials if Supabase not configured
+        const result = await signIn('credentials', {
+          email,
+          password,
+          redirect: false,
+        })
+
+        if (result?.error) {
+          setError('Invalid email or password')
+        } else if (result?.ok) {
+          router.push(callbackUrl)
+          router.refresh()
+        }
       }
     } catch {
       setError('An error occurred during sign in')
