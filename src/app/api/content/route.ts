@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const authUser = await getAuthUser(request)
     const { searchParams } = new URL(request.url)
     const domainId = searchParams.get('domain')
     const contentType = searchParams.get('type')
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     if (status) where.lifecycleState = status.toUpperCase() as LifecycleState
 
     // If not authenticated, only show published content
-    if (!session?.user?.email || publicOnly) {
+    if (!authUser?.email || publicOnly) {
       where.lifecycleState = 'PUBLISHED'
       where.sensitivity = {
         in: ['PUBLIC', 'INTERNAL']
