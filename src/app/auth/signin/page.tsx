@@ -4,6 +4,7 @@ import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useSupabaseAuth } from '@/hooks/useSupabaseAuth'
 
 function SignInContent() {
   const [isLoading, setIsLoading] = useState(false)
@@ -14,21 +15,20 @@ function SignInContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get('callbackUrl') || '/'
+  const { signInWithEmail, signInWithGoogle } = useSupabaseAuth()
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true)
+    setError('')
     try {
-      const result = await signIn('google', {
-        callbackUrl,
-        redirect: false,
-      })
-      
-      if (result?.ok) {
-        router.push(callbackUrl)
+      const { error: supabaseError } = await signInWithGoogle()
+      if (supabaseError) {
+        setError('Failed to sign in with Google')
+        setIsLoading(false)
       }
+      // If successful, the redirect will happen automatically via the callback
     } catch {
-      console.error('Sign in error')
-    } finally {
+      setError('An error occurred during sign in')
       setIsLoading(false)
     }
   }
@@ -39,17 +39,12 @@ function SignInContent() {
     setError('')
 
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      })
+      const { data, error: supabaseError } = await signInWithEmail(email, password)
 
-      if (result?.error) {
-        setError('Invalid email or password')
-      } else if (result?.ok) {
+      if (supabaseError) {
+        setError(supabaseError.message || 'Invalid email or password')
+      } else if (data.user) {
         router.push(callbackUrl)
-        router.refresh()
       }
     } catch {
       setError('An error occurred during sign in')
@@ -76,6 +71,11 @@ function SignInContent() {
         <div className="mt-8 space-y-6">
           {!showEmailForm ? (
             <>
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
               <div>
                 <button
                   onClick={handleGoogleSignIn}
