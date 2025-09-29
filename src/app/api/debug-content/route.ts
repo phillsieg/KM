@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthUser } from '@/lib/server-auth'
 import { prisma } from '@/lib/prisma'
+import { ContentType, LifecycleState, Sensitivity } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,13 +33,13 @@ export async function POST(request: NextRequest) {
       summary: 'Test summary',
       body: 'Test content',
       slug: 'test-doc-' + Date.now(),
-      contentType: 'SOP',
+      contentType: ContentType.SOP,
       domainId: domains[0]?.id || 'missing-domain',
       ownerId: dbUser?.id || 'missing-user',
       authorId: dbUser?.id || 'missing-user',
-      sensitivity: 'INTERNAL',
+      sensitivity: Sensitivity.INTERNAL,
       reviewCycle: 12,
-      lifecycleState: 'DRAFT',
+      lifecycleState: LifecycleState.DRAFT,
     }
 
     console.log('Test data to create:', testData)
