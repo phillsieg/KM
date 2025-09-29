@@ -130,12 +130,29 @@ export default function CreateDocumentPage() {
     setLoading(true)
 
     try {
-      const { authenticatedFetch } = await import('@/lib/api-client')
-      const response = await authenticatedFetch('/api/content', {
+      // Import at the top to avoid dynamic import issues
+      const { supabase } = await import('@/lib/supabase')
+
+      // Get auth headers
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json',
+      }
+
+      // Add Supabase auth token if available
+      if (supabase) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession()
+          if (session?.access_token) {
+            headers.authorization = `Bearer ${session.access_token}`
+          }
+        } catch (error) {
+          console.error('Error getting Supabase session:', error)
+        }
+      }
+
+      const response = await fetch('/api/content', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(formData),
       })
 
