@@ -6,11 +6,19 @@ import type { Prisma } from '@prisma/client'
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('=== API /content POST Debug ===')
+    console.log('Authorization header:', request.headers.get('authorization'))
+    console.log('All headers:', Object.fromEntries(request.headers.entries()))
+
     const authUser = await getAuthUser(request)
+    console.log('Auth user result:', authUser)
 
     if (!authUser?.email) {
+      console.log('No auth user found, returning 401')
       return NextResponse.json({ error: 'Unauthorized - Please log in first' }, { status: 401 })
     }
+
+    console.log('Authenticated user:', authUser.email)
 
     // Try to find user, create if doesn't exist
     let user = await prisma.user.findUnique({

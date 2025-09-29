@@ -13,9 +13,14 @@ export interface AuthUser {
 }
 
 export async function getAuthUser(request?: NextRequest): Promise<AuthUser | null> {
+  console.log('=== Server Auth Debug ===')
+
   // Try Supabase first if configured
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  console.log('Supabase configured:', !!supabaseUrl && !!supabaseAnonKey)
+  console.log('Request provided:', !!request)
 
   if (supabaseUrl && supabaseAnonKey && request) {
     try {
@@ -23,15 +28,22 @@ export async function getAuthUser(request?: NextRequest): Promise<AuthUser | nul
 
       // Get auth token from request headers
       const authHeader = request.headers.get('authorization')
+      console.log('Auth header present:', !!authHeader)
+
       if (authHeader?.startsWith('Bearer ')) {
         const token = authHeader.substring(7)
+        console.log('Token extracted, length:', token.length)
+
         const { data: { user }, error } = await supabase.auth.getUser(token)
+        console.log('Supabase getUser result:', { user: !!user, error })
 
         if (user && !error) {
           // Try to get user profile from database
           const dbUser = await prisma.user.findUnique({
             where: { email: user.email! }
           })
+
+          console.log('Database user found:', !!dbUser)
 
           return {
             id: user.id,
