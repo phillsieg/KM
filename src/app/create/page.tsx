@@ -129,6 +129,9 @@ export default function CreateDocumentPage() {
     e.preventDefault()
     setLoading(true)
 
+    console.log('🚀 Starting document creation...')
+    console.log('📝 Form data:', formData)
+
     try {
       // Import at the top to avoid dynamic import issues
       const { supabase } = await import('@/lib/supabase')
@@ -142,32 +145,52 @@ export default function CreateDocumentPage() {
       if (supabase) {
         try {
           const { data: { session } } = await supabase.auth.getSession()
+          console.log('🔐 Supabase session:', !!session)
           if (session?.access_token) {
             headers.authorization = `Bearer ${session.access_token}`
+            console.log('✅ Added auth token to headers')
+          } else {
+            console.log('⚠️ No access token found in session')
           }
         } catch (error) {
-          console.error('Error getting Supabase session:', error)
+          console.error('❌ Error getting Supabase session:', error)
         }
+      } else {
+        console.log('⚠️ No Supabase client available')
       }
 
+      console.log('🌐 Making API request to /api/content...')
       const response = await fetch('/api/content', {
         method: 'POST',
         headers,
         body: JSON.stringify(formData),
       })
 
+      console.log('📡 Response status:', response.status)
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
+
       if (response.ok) {
         const newContent = await response.json()
+        console.log('✅ Document created successfully:', newContent)
         router.push(`/content/${newContent.id}`)
       } else {
-        const error = await response.json()
-        alert(`Error creating document: ${error.error}`)
+        const error = await response.text()
+        console.error('❌ API error response:', error)
+        let errorMessage = 'Unknown error'
+        try {
+          const errorObj = JSON.parse(error)
+          errorMessage = errorObj.error || errorObj.message || 'Unknown error'
+        } catch {
+          errorMessage = error
+        }
+        alert(`Error creating document: ${errorMessage}`)
       }
     } catch (error) {
-      console.error('Error creating document:', error)
-      alert('An error occurred while creating the document')
+      console.error('💥 Fatal error creating document:', error)
+      alert(`Fatal error: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
+      console.log('🏁 Document creation attempt finished')
     }
   }
 
