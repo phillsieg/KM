@@ -5,7 +5,6 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { UserRole } from "@prisma/client"
 import { prisma } from "./prisma"
-import { supabase } from "./supabase"
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),

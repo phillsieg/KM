@@ -7,6 +7,11 @@ export function useSupabaseAuth() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
@@ -28,6 +33,9 @@ export function useSupabaseAuth() {
   }, [])
 
   const signInWithEmail = async (email: string, password: string) => {
+    if (!supabase) {
+      return { data: null, error: { message: 'Supabase not configured' } }
+    }
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -36,6 +44,9 @@ export function useSupabaseAuth() {
   }
 
   const signUpWithEmail = async (email: string, password: string) => {
+    if (!supabase) {
+      return { data: null, error: { message: 'Supabase not configured' } }
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -44,6 +55,9 @@ export function useSupabaseAuth() {
   }
 
   const signInWithGoogle = async () => {
+    if (!supabase) {
+      return { data: null, error: { message: 'Supabase not configured' } }
+    }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -54,6 +68,9 @@ export function useSupabaseAuth() {
   }
 
   const signOut = async () => {
+    if (!supabase) {
+      return { error: { message: 'Supabase not configured' } }
+    }
     const { error } = await supabase.auth.signOut()
     return { error }
   }
